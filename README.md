@@ -149,3 +149,9 @@ end,
 ```
 
 </details>
+
+## Credits
+
+**[Neovim team](https://github.com/orgs/neovim/people)**: This plugin is literally a copy and paste of the original `vim.lsp.inlay_hint` implementation.
+
+**[nvim-dap-virtual-text](https://github.com/theHamsta/nvim-dap-virtual-text)**: Who inspired this plugin.
