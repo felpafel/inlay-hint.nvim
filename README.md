@@ -4,7 +4,7 @@ This plugin overrides `vim.lsp.inlay_hint` and expose a simple callback that per
 
 ## Demo
 
-<!-- NOTE: Insert a video demonstrating 'inline', 'eol', 'right_align' -->
+https://github.com/felpafel/inlay-hint.nvim/assets/21080902/9fb01599-5a0d-466e-83fe-434591175d51
 
 ## Motivation
 
