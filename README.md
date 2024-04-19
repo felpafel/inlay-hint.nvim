@@ -136,11 +136,11 @@ callback = function(args)
   local bufnr = args.buf ---@type number
   local client = vim.lsp.get_client_by_id(args.data.client_id)
   if client.supports_method('textDocument/inlayHint') then
-    vim.lsp.inlay_hint.enable(bufnr, true)
+    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
     vim.keymap.set('n', '<leader>uh', function()
       vim.lsp.inlay_hint.enable(
-        bufnr,
-        not vim.lsp.inlay_hint.is_enabled(bufnr)
+        not vim.lsp.inlay_hint.is_enabled(bufnr),
+        { bufnr = bufnr }
       )
     end, { buffer = bufnr })
   end
