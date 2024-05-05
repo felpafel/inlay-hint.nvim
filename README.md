@@ -139,7 +139,7 @@ callback = function(args)
     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
     vim.keymap.set('n', '<leader>uh', function()
       vim.lsp.inlay_hint.enable(
-        not vim.lsp.inlay_hint.is_enabled(bufnr),
+        not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }),
         { bufnr = bufnr }
       )
     end, { buffer = bufnr })
