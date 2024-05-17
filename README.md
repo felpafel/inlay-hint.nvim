@@ -4,7 +4,7 @@ This plugin overrides `vim.lsp.inlay_hint` and expose a simple callback that per
 
 ## Demo
 
-<!-- TODO: Insert demo -->
+![demo](https://github.com/felpafel/inlay-hint.nvim/assets/21080902/7f1c1535-cfb1-4020-bee7-55e6a8a67f4d)
 
 ## Motivation
 
@@ -45,7 +45,8 @@ require('inlay-hint').setup()
     <summary>
       Demo completion with neodev
       </summary>
-    <!-- TODO: Insert display_callback_completion_demo here -->
+    ![display_callback_completion_demo](https://github.com/felpafel/inlay-hint.nvim/assets/21080902/d31ea6b0-dac8-4dca-8ef9-4356d9b2a23d)
+
     </details>
 
 ```lua
