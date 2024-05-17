@@ -4,15 +4,15 @@ This plugin overrides `vim.lsp.inlay_hint` and expose a simple callback that per
 
 ## Demo
 
-https://github.com/felpafel/inlay-hint.nvim/assets/21080902/8a440e6a-e982-4407-bb9c-d63c374122fb
+<!-- TODO: Insert demo -->
 
 ## Motivation
 
-Since inlay hints got integrated to `neovim nightly` many authors deprecated/archived their own implementations and started using the `vim.lsp.inlay_hint` api. However, the native API doesn't expose any method to edit how hints are shown in the buffer. So, inspired by the `display_callback` implemented in [nvim-dap-virtual-text](https://github.com/theHamsta/nvim-dap-virtual-text) I decide to create this plugin.
+Since inlay hints got integrated to `Neovim` many authors deprecated/archived their own implementations and started calling the `vim.lsp.inlay_hint` api. However, the native API doesn't expose any method to edit how hints are shown in the buffer, and there is an open issue [#28261](https://github.com/neovim/neovim/issues/28261) discussing this topic. So, inspired by the `display_callback` implemented in [nvim-dap-virtual-text](https://github.com/theHamsta/nvim-dap-virtual-text) I decide to create this plugin.
 
 ## Prerequisites
 
-- `neovim v0.10.0` with `vim.lsp.inlay_hint` API.
+- [`NVIM v0.10.0`](https://github.com/neovim/neovim/releases/tag/v0.10.0)
 
 ## Installation
 
@@ -41,22 +41,15 @@ require('inlay-hint').setup()
 
 > In order get better completions and type hints inside Neovim, please check [folke/neodev.nvim](https://github.com/folke/neodev.nvim).
 
-````lua
+  <details>
+    <summary>
+      Demo completion with neodev
+      </summary>
+    <!-- TODO: Insert display_callback_completion_demo here -->
+    </details>
+
+```lua
 require('inlay-hint').setup({
-  --- If `override_native_inlay_hint` is set to `false`, you have to manually
-  --- attach to lsp-handlers:
-  ---
-  --- ```lua
-  --- local inlay_hint = require('inlay-hint')
-  --- inlay_hint.setup({ override_native_inlay_hint = false })
-  --- lsp.handler['workspace/inlayHint/refresh'] = function(err, result, ctx, config)
-  ---   return inlay_hint.on_refresh(err, result, ctx, config)
-  --- end
-  --- lsp.handler['textDocument/inlayHint'] = function(...)
-  ---   return inlay_hint.on_inlayhint(...)
-  --- end
-  --- ```
-  override_native_inlay_hint = true,
   virt_text_pos = 'eol',
   highlight_group = 'LspInlayHint',
   hl_mode = 'combine',
@@ -121,7 +114,7 @@ require('inlay-hint').setup({
     return nil
   end,
 })
-````
+```
 
 </details>
 
@@ -137,7 +130,7 @@ callback = function(args)
   local client = vim.lsp.get_client_by_id(args.data.client_id)
   if client.supports_method('textDocument/inlayHint') then
     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-    vim.keymap.set('n', '<leader>uh', function()
+    vim.keymap.set('n', '<leader>i', function()
       vim.lsp.inlay_hint.enable(
         not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }),
         { bufnr = bufnr }
