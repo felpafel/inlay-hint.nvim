@@ -39,15 +39,7 @@ require('inlay-hint').setup()
 	Or with additional options
   </summary>
 
-> In order get better completions and type hints inside Neovim, please check [folke/neodev.nvim](https://github.com/folke/neodev.nvim).
-
-  <details>
-    <summary>
-      Demo completion with neodev
-      </summary>
-    ![display_callback_completion_demo](https://github.com/felpafel/inlay-hint.nvim/assets/21080902/d31ea6b0-dac8-4dca-8ef9-4356d9b2a23d)
-
-    </details>
+> In order to get better completions and type hints inside Neovim, please check [folke/neodev.nvim](https://github.com/folke/neodev.nvim). [completion demo](https://github.com/felpafel/inlay-hint.nvim/assets/21080902/d31ea6b0-dac8-4dca-8ef9-4356d9b2a23d)
 
 ```lua
 require('inlay-hint').setup({
