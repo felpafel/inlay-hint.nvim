@@ -104,7 +104,7 @@ function M.on_inlayhint(err, result, ctx, _)
     api.nvim__redraw({ buf = bufnr, valid = true })
 end
 
---- |lsp-handler| for the method `textDocument/inlayHint/refresh`
+--- |lsp-handler| for the method `workspace/inlayHint/refresh`
 ---@param ctx lsp.HandlerContext
 ---@private
 function M.on_refresh(err, _, ctx, _)
@@ -142,7 +142,8 @@ end
 --- local hint = vim.lsp.inlay_hint.get({ bufnr = 0 })[1] -- 0 for current buffer
 ---
 --- local client = vim.lsp.get_client_by_id(hint.client_id)
---- resolved_hint = client.request_sync('inlayHint/resolve', hint.inlay_hint, 100, 0).result
+--- local resp = client.request_sync('inlayHint/resolve', hint.inlay_hint, 100, 0)
+--- local resolved_hint = assert(resp and resp.result, resp.err)
 --- vim.lsp.util.apply_text_edits(resolved_hint.textEdits, 0, client.encoding)
 ---
 --- location = resolved_hint.label[1].location
@@ -336,56 +337,6 @@ api.nvim_create_autocmd('LspDetach', {
     end,
     group = augroup,
 })
-
-api.nvim_set_decoration_provider(namespace, {
-    on_win = function(_, _, bufnr, topline, botline)
-        local bufstate = bufstates[bufnr]
-        if not bufstate then
-            return
-        end
-
-        if bufstate.version ~= util.buf_versions[bufnr] then
-            return
-        end
-        local hints_by_client = assert(bufstate.client_hints)
-
-        for lnum = topline, botline do
-            if bufstate.applied[lnum] ~= bufstate.version then
-                api.nvim_buf_clear_namespace(bufnr, namespace, lnum, lnum + 1)
-                for _, lnum_hint in pairs(hints_by_client) do
-                    local line_hints = lnum_hint[lnum] or {}
-                    local lhint = options.display_callback(line_hints, options)
-                    if lhint then -- skip nil
-                        if type(lhint) == 'string' then
-                            lhint = { { text = lhint, col = 0 } }
-                        end
-                        for _, hint in pairs(lhint) do
-                            api.nvim_buf_set_extmark(
-                                bufnr,
-                                namespace,
-                                lnum,
-                                hint.col,
-                                {
-                                    hl_mode = options.hl_mode,
-                                    virt_text_pos = options.virt_text_pos,
-                                    ephemeral = false,
-                                    virt_text = {
-                                        {
-                                            hint.text,
-                                            options.highlight_group,
-                                        },
-                                    },
-                                }
-                            )
-                        end
-                    end
-                end
-                bufstate.applied[lnum] = bufstate.version
-            end
-        end
-    end,
-})
-
 api.nvim_set_decoration_provider(namespace, {
     on_win = function(_, _, bufnr, topline, botline)
         ---@type vim.lsp.inlay_hint.bufstate
@@ -406,9 +357,9 @@ api.nvim_set_decoration_provider(namespace, {
         for lnum = topline, botline do
             if bufstate.applied[lnum] ~= bufstate.version then
                 api.nvim_buf_clear_namespace(bufnr, namespace, lnum, lnum + 1)
-                for _, lnum_hint in pairs(client_hints) do
-                    local line_hints = lnum_hint[lnum] or {}
-                    local lhint = options.display_callback(line_hints, options)
+                for _, lnum_hints in pairs(client_hints) do
+                    local hints = lnum_hints[lnum] or {}
+                    local lhint = options.display_callback(hints, options)
                     if lhint then -- skip nil
                         if type(lhint) == 'string' then
                             lhint = { { text = lhint, col = 0 } }
@@ -440,24 +391,14 @@ api.nvim_set_decoration_provider(namespace, {
     end,
 })
 
+--- Query whether inlay hint is enabled in the {filter}ed scope
 --- @param filter vim.lsp.inlay_hint.enable.Filter
 --- @return boolean
 --- @since 12
 function M.is_enabled(filter)
-    ---@type integer
-    local bufnr
-    if type(filter) == 'number' then
-        vim.deprecate(
-            'vim.lsp.inlay_hint.is_enabled(bufnr:number)',
-            'vim.lsp.inlay_hint.is_enabled(filter:table)',
-            '0.10-dev'
-        )
-        bufnr = filter
-    else
-        vim.validate({ filter = { filter, 'table', true } })
-        filter = filter or {}
-        bufnr = filter.bufnr
-    end
+    vim.validate({ filter = { filter, 'table', true } })
+    filter = filter or {}
+    local bufnr = filter.bufnr
 
     vim.validate({ bufnr = { bufnr, 'number', true } })
     if bufnr == nil then
@@ -474,7 +415,7 @@ end
 --- Buffer number, or 0 for current buffer, or nil for all.
 --- @field bufnr integer?
 
---- Enables or disables inlay hints for a buffer.
+--- Enables or disables inlay hints for the {filter}ed scope.
 ---
 --- To "toggle", pass the inverse of `is_enabled()`:
 ---
@@ -486,15 +427,6 @@ end
 --- @param filter vim.lsp.inlay_hint.enable.Filter?
 --- @since 12
 function M.enable(enable, filter)
-    if type(enable) == 'number' or type(filter) == 'boolean' then
-        vim.deprecate(
-            'vim.lsp.inlay_hint.enable(bufnr:number, enable:boolean)',
-            'vim.lsp.inlay_hint.enable(enable:boolean, filter:table)',
-            '0.10-dev'
-        )
-        error('see :help vim.lsp.inlay_hint.enable() for updated parameters')
-    end
-
     vim.validate({
         enable = { enable, 'boolean', true },
         filter = { filter, 'table', true },
@@ -504,7 +436,7 @@ function M.enable(enable, filter)
 
     if filter.bufnr == nil then
         globalstate.enabled = enable
-        for bufnr, _ in pairs(bufstates) do
+        for _, bufnr in ipairs(api.nvim_list_bufs()) do
             if api.nvim_buf_is_loaded(bufnr) then
                 if enable == false then
                     _disable(bufnr)
@@ -525,26 +457,11 @@ function M.enable(enable, filter)
 end
 
 --- @class InlayHintConfig
---- @field override_native_inlay_hint boolean
 --- @field virt_text_pos 'eol'|'right_align'|'inline'
 --- @field highlight_group string
 --- @field hl_mode 'combine'|'replace'|'blend'
 --- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig): ({text: string, col: number}[]|string|nil)
 local defaults = {
-    --- If `override_native_inlay_hint` is set to `false`, you have to manually
-    --- attach to lsp-handlers:
-    ---
-    --- ```lua
-    --- local inlay_hint = require('inlay-hint')
-    --- inlay_hint.setup({ override_native_inlay_hint = false })
-    --- lsp.handler['workspace/inlayHint/refresh'] = function(err, result, ctx, config)
-    ---   return inlay_hint.on_refresh(err, result, ctx, config)
-    --- end
-    --- lsp.handler['textDocument/inlayHint'] = function(...)
-    ---   return inlay_hint.on_inlayhint(...)
-    --- end
-    --- ```
-    override_native_inlay_hint = true,
     virt_text_pos = 'eol',
     highlight_group = 'LspInlayHint',
     hl_mode = 'combine',
@@ -611,7 +528,6 @@ local defaults = {
 }
 
 --- @class InlayHintPartialConfig
---- @field override_native_inlay_hint? boolean
 --- @field virt_text_pos? 'eol'|'right_align'|'inline'
 --- @field highlight_group? string
 --- @field hl_mode? 'combine'|'replace'|'blend'
@@ -621,10 +537,7 @@ local defaults = {
 ---@param opts InlayHintPartialConfig?
 function M.setup(opts)
     options = vim.tbl_deep_extend('force', {}, defaults, opts or {})
-    -- Overriding default implementation
-    if options.override_native_inlay_hint then
-        vim.lsp.inlay_hint = M
-    end
+    vim.lsp.inlay_hint = M
     -- NOTE: Redraw inlay_hints, so the user can change the config multiple
     -- times in the same session
     for _, client in
