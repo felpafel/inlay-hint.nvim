@@ -21,6 +21,7 @@ Since inlay hints got integrated to `Neovim` many authors deprecated/archived th
 ```lua
 {
   'felpafel/inlay-hint.nvim',
+  tag = 'v1.0.0',
   event = 'LspAttach',
   config = true,
 }
@@ -39,7 +40,7 @@ require('inlay-hint').setup()
 	Or with additional options
   </summary>
 
-> In order to get better completions and type hints inside Neovim, please check [folke/neodev.nvim](https://github.com/folke/neodev.nvim). [completion demo](https://github.com/felpafel/inlay-hint.nvim/assets/21080902/d31ea6b0-dac8-4dca-8ef9-4356d9b2a23d)
+> In order to get better completions and type hints inside Neovim, please check [folke/lazydev.nvim](https://github.com/folke/lazydev.nvim). [completion demo](https://github.com/felpafel/inlay-hint.nvim/assets/21080902/6cf9c785-0cb7-43fc-9d40-f1f9c0f6e0fc)
 
 ```lua
 require('inlay-hint').setup({
