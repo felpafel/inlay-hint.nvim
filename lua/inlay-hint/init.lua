@@ -359,7 +359,8 @@ api.nvim_set_decoration_provider(namespace, {
                 api.nvim_buf_clear_namespace(bufnr, namespace, lnum, lnum + 1)
                 for _, lnum_hints in pairs(client_hints) do
                     local hints = lnum_hints[lnum] or {}
-                    local lhint = options.display_callback(hints, options)
+                    local lhint =
+                        options.display_callback(hints, options, bufnr)
                     if lhint then -- skip nil
                         if type(lhint) == 'string' then
                             lhint = { { text = lhint, col = 0 } }
@@ -460,12 +461,12 @@ end
 --- @field virt_text_pos 'eol'|'right_align'|'inline'
 --- @field highlight_group string
 --- @field hl_mode 'combine'|'replace'|'blend'
---- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig): ({text: string, col: number}[]|string|nil)
+--- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number): ({text: string, col: number}[]|string|nil)
 local defaults = {
     virt_text_pos = 'eol',
     highlight_group = 'LspInlayHint',
     hl_mode = 'combine',
-    display_callback = function(line_hints, options)
+    display_callback = function(line_hints, options, bufnr)
         if options.virt_text_pos == 'inline' then
             local lhint = {}
             for _, hint in pairs(line_hints) do
@@ -535,7 +536,7 @@ local defaults = {
 --- @field virt_text_pos? 'eol'|'right_align'|'inline'
 --- @field highlight_group? string
 --- @field hl_mode? 'combine'|'replace'|'blend'
---- @field display_callback? fun(line_hints: lsp.InlayHint[], options: InlayHintConfig): ({text: string, col: number}[]|string|nil)
+--- @field display_callback? fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number): ({text: string, col: number}[]|string|nil)
 
 ---Setup/Update inlay-hint.nvim
 ---@param opts InlayHintPartialConfig?
