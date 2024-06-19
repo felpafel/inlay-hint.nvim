@@ -21,7 +21,6 @@ Since inlay hints got integrated to `Neovim` many authors deprecated/archived th
 ```lua
 {
   'felpafel/inlay-hint.nvim',
-  tag = 'v1.0.0',
   event = 'LspAttach',
   config = true,
 }
@@ -97,12 +96,16 @@ require('inlay-hint').setup({
         end
       end
       local text = ''
-      if #k1 > 0 then
-        text = '=> ' .. table.concat(k1, ',')
-      end
       if #k2 > 0 then
         text = '<- (' .. table.concat(k2, ',') .. ')'
       end
+      if #text > 0 then
+        text = text .. ' '
+      end
+      if #k1 > 0 then
+        text = text .. '=> ' .. table.concat(k1, ',')
+      end
+
       return text
     end
     return nil
