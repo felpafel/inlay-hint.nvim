@@ -515,12 +515,16 @@ local defaults = {
                 end
             end
             local text = ''
-            if #k1 > 0 then
-                text = '=> ' .. table.concat(k1, ',')
-            end
             if #k2 > 0 then
                 text = '<- (' .. table.concat(k2, ',') .. ')'
             end
+            if #text > 0 then
+                text = text .. ' '
+            end
+            if #k1 > 0 then
+                text = text .. '=> ' .. table.concat(k1, ',')
+            end
+
             return text
         end
         return nil
