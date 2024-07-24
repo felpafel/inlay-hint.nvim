@@ -430,7 +430,7 @@ end
 --- @class InlayHintConfig
 --- @field virt_text_pos 'eol'|'right_align'|'inline'
 --- @field highlight_group string
---- @field hl_mode 'combine'|'replace'|'blend'
+--- @field hl_mode 'combine'|'replace'
 --- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number): ({text: string, col: number}[]|string|nil)
 local defaults = {
   virt_text_pos = 'eol',
@@ -499,9 +499,23 @@ local defaults = {
 }
 
 --- @class InlayHintPartialConfig
+--- Position of virtual text. Possible values:
+--- 'eol': right after eol character (default).
+--- 'right_align': display right aligned in the window.
+--- 'inline': display at the specified column, and shift the buffer
+--- text to the right as needed.
 --- @field virt_text_pos? 'eol'|'right_align'|'inline'
+--- Can be supplied either as a string or as an integer,
+--- the latter which can be obtained using |nvim_get_hl_id_by_name()|.
 --- @field highlight_group? string
---- @field hl_mode? 'combine'|'replace'|'blend'
+--- Control how highlights are combined with the
+--- highlights of the text.
+--- 'combine': combine with background text color. (default)
+--- 'replace': only show the virt_text color.
+--- @field hl_mode? 'combine'|'replace'
+--- line_hints: array with all hints present in current line.
+--- options: table with this plugin configuration.
+--- bufnr: buffer id from where the hints come from.
 --- @field display_callback? fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number): ({text: string, col: number}[]|string|nil)
 
 ---Setup/Update inlay-hint.nvim
