@@ -78,7 +78,7 @@ function M.on_inlayhint(err, result, ctx, _)
     local col = position.character
     if col > 0 then
       local line = lines[position.line + 1] or ''
-      return util._str_byteindex_enc(line, col, client.offset_encoding)
+      return vim.str_byteindex(line, client.offset_encoding, col, false)
     end
     return col
   end
