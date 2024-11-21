@@ -1,6 +1,6 @@
-# inlay-hint.nvim
+# inlay-hint.nvim - Nightly
 
-This plugin overrides `vim.lsp.inlay_hint` and expose a simple callback that permits the user to edit how inlay hints are displayed, without changing any native API or core logic.
+This branch tries to be up to date with Neovim's nightly releases, pull requests are welcome. Don't forget to update your [configuration](#installation).
 
 ## Demo
 
@@ -77,6 +77,7 @@ Since inlay hints got integrated to `Neovim` many authors deprecated/archived th
 ```lua
 {
   'felpafel/inlay-hint.nvim',
+  branch = 'nightly',
   event = 'LspAttach',
   config = true,
 }
