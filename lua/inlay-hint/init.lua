@@ -30,15 +30,15 @@ local bufstates = vim.defaulttable(function(_)
   })
 end)
 
-local namespace = api.nvim_create_namespace('vim_lsp_inlayhint')
-local augroup = api.nvim_create_augroup('vim_lsp_inlayhint', {})
+local namespace = api.nvim_create_namespace('nvim.lsp.inlayhint')
+local augroup = api.nvim_create_augroup('nvim.lsp.inlayhint', {})
 
 --- |lsp-handler| for the method `textDocument/inlayHint`
 --- Store hints for a specific buffer and client
 ---@param result lsp.InlayHint[]?
 ---@param ctx lsp.HandlerContext
 ---@private
-function M.on_inlayhint(err, result, ctx, _)
+function M.on_inlayhint(err, result, ctx)
   if err then
     log.error('inlayhint', err)
     return
@@ -66,7 +66,7 @@ function M.on_inlayhint(err, result, ctx, _)
   if num_unprocessed == 0 then
     client_hints[client_id] = {}
     bufstate.version = ctx.version
-    api.nvim__redraw({ buf = bufnr, valid = true })
+    api.nvim__redraw({ buf = bufnr, valid = true, flush = false })
     return
   end
 
@@ -123,12 +123,12 @@ end
 --- local hint = vim.lsp.inlay_hint.get({ bufnr = 0 })[1] -- 0 for current buffer
 ---
 --- local client = vim.lsp.get_client_by_id(hint.client_id)
---- local resp = client.request_sync('inlayHint/resolve', hint.inlay_hint, 100, 0)
+--- local resp = client:request_sync('inlayHint/resolve', hint.inlay_hint, 100, 0)
 --- local resolved_hint = assert(resp and resp.result, resp.err)
 --- vim.lsp.util.apply_text_edits(resolved_hint.textEdits, 0, client.encoding)
 ---
 --- location = resolved_hint.label[1].location
---- client.request('textDocument/hover', {
+--- client:request('textDocument/hover', {
 ---   textDocument = { uri = location.uri },
 ---   position = location.range.start,
 --- })
@@ -150,8 +150,8 @@ function M.get(filter)
       vim.list_extend(hints, M.get(vim.tbl_extend('keep', { bufnr = buf }, filter)))
     end, vim.api.nvim_list_bufs())
     return hints
-  elseif bufnr == 0 then
-    bufnr = api.nvim_get_current_buf()
+  else
+    bufnr = vim._resolve_bufnr(bufnr)
   end
 
   local bufstate = bufstates[bufnr]
@@ -204,9 +204,7 @@ end
 --- Clear inlay hints
 ---@param bufnr (integer) Buffer handle, or 0 for current
 local function clear(bufnr)
-  if bufnr == 0 then
-    bufnr = api.nvim_get_current_buf()
-  end
+  bufnr = vim._resolve_bufnr(bufnr)
   local bufstate = bufstates[bufnr]
   local client_lens = (bufstate or {}).client_hints or {}
   local client_ids = vim.tbl_keys(client_lens) --- @type integer[]
@@ -222,9 +220,7 @@ end
 --- Disable inlay hints for a buffer
 ---@param bufnr (integer) Buffer handle, or 0 for current
 local function _disable(bufnr)
-  if bufnr == 0 then
-    bufnr = api.nvim_get_current_buf()
-  end
+  bufnr = vim._resolve_bufnr(bufnr)
   clear(bufnr)
   bufstates[bufnr] = nil
   bufstates[bufnr].enabled = false
@@ -243,9 +239,7 @@ end
 --- Enable inlay hints for a buffer
 ---@param bufnr (integer) Buffer handle, or 0 for current
 local function _enable(bufnr)
-  if bufnr == 0 then
-    bufnr = api.nvim_get_current_buf()
-  end
+  bufnr = vim._resolve_bufnr(bufnr)
   bufstates[bufnr] = nil
   bufstates[bufnr].enabled = true
   _refresh(bufnr)
@@ -360,13 +354,10 @@ function M.is_enabled(filter)
   filter = filter or {}
   local bufnr = filter.bufnr
 
-  vim.validate('bufnr', bufnr, 'number', true)
   if bufnr == nil then
     return globalstate.enabled
-  elseif bufnr == 0 then
-    bufnr = api.nvim_get_current_buf()
   end
-  return bufstates[bufnr].enabled
+  return bufstates[vim._resolve_bufnr(bufnr)].enabled
 end
 
 --- Optional filters |kwargs|, or `nil` for all.
