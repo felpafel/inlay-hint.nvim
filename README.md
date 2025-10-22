@@ -118,7 +118,7 @@ require('inlay-hint').setup({
   -- line_hints: array with all hints present in current line.
   -- options: table with this plugin configuration.
   -- bufnr: buffer id from where the hints come from.
-  display_callback = function(line_hints, options, bufnr)
+  display_callback = function(line_hints, options, bufnr, winid)
     if options.virt_text_pos == 'inline' then
       local lhint = {}
       for _, hint in pairs(line_hints) do
@@ -212,7 +212,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 ```lua
 require('inlay-hint').setup({
-display_callback = function(line_hints, options, bufnr)
+  display_callback = function(line_hints, options, bufnr, winid)
   if options.virt_text_pos == 'inline' then
     local lhint = {}
     for _, hint in pairs(line_hints) do
