@@ -338,6 +338,7 @@ api.nvim_set_decoration_provider(namespace, {
                     options.highlight_group,
                   },
                 },
+                priority = options.priority,
               })
             end
           end
@@ -412,11 +413,13 @@ end
 --- @field virt_text_pos 'eol'|'right_align'|'inline'
 --- @field highlight_group string
 --- @field hl_mode 'combine'|'replace'
+--- @field priority number
 --- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number, winid: number): ({text: string, col: number}[]|string|nil)
 local defaults = {
   virt_text_pos = 'eol',
   highlight_group = 'LspInlayHint',
   hl_mode = 'combine',
+  priority = 1001,
   display_callback = function(line_hints, options, bufnr, winid)
     if options.virt_text_pos == 'inline' then
       local lhint = {}
@@ -494,6 +497,8 @@ local defaults = {
 --- 'combine': combine with background text color. (default)
 --- 'replace': only show the virt_text color.
 --- @field hl_mode? 'combine'|'replace'
+--- Set the display priority when multiple extmark are present.
+--- @field priority? number
 --- line_hints: array with all hints present in current line.
 --- options: table with this plugin configuration.
 --- bufnr: buffer id from where the hints come from.
