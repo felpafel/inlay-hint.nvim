@@ -68,7 +68,7 @@ Since inlay hints got integrated to `Neovim` many authors deprecated/archived th
 
 ## Prerequisites
 
-- [`NVIM v0.10.0`](https://github.com/neovim/neovim/releases/tag/v0.10.0)
+- [`NVIM v0.10.0`](https://github.com/neovim/neovim/releases/tag/v0.10.0) or newer.
 
 ## Installation
 
@@ -77,6 +77,14 @@ Since inlay hints got integrated to `Neovim` many authors deprecated/archived th
 ```lua
 {
   'felpafel/inlay-hint.nvim',
+  event = 'LspAttach',
+  config = true,
+}
+
+-- To use with Neovim Nightly
+{
+  'felpafel/inlay-hint.nvim',
+  branch = 'nightly',
   event = 'LspAttach',
   config = true,
 }
