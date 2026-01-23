@@ -317,7 +317,7 @@ api.nvim_create_autocmd('LspDetach', {
   group = augroup,
 })
 api.nvim_set_decoration_provider(namespace, {
-  on_win = function(_, _, bufnr, topline, botline)
+  on_win = function(_, winid, bufnr, topline, botline)
     ---@type vim.lsp.inlay_hint.bufstate
     local bufstate = rawget(bufstates, bufnr)
     if not bufstate then
@@ -338,7 +338,7 @@ api.nvim_set_decoration_provider(namespace, {
         api.nvim_buf_clear_namespace(bufnr, namespace, lnum, lnum + 1)
         for _, lnum_hints in pairs(client_hints) do
           local hints = lnum_hints[lnum] or {}
-          local lhint = options.display_callback(hints, options, bufnr)
+          local lhint = options.display_callback(hints, options, bufnr, winid)
           if lhint then -- skip nil
             if type(lhint) == 'string' then
               lhint = { { text = lhint, col = 0 } }
@@ -354,6 +354,7 @@ api.nvim_set_decoration_provider(namespace, {
                     options.highlight_group,
                   },
                 },
+                priority = options.priority,
               })
             end
           end
@@ -428,12 +429,14 @@ end
 --- @field virt_text_pos 'eol'|'right_align'|'inline'
 --- @field highlight_group string
 --- @field hl_mode 'combine'|'replace'
---- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number): ({text: string, col: number}[]|string|nil)
+--- @field priority number
+--- @field display_callback fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number, winid: number): ({text: string, col: number}[]|string|nil)
 local defaults = {
   virt_text_pos = 'eol',
   highlight_group = 'LspInlayHint',
   hl_mode = 'combine',
-  display_callback = function(line_hints, options, bufnr)
+  priority = 1001,
+  display_callback = function(line_hints, options, bufnr, winid)
     if options.virt_text_pos == 'inline' then
       local lhint = {}
       for _, hint in pairs(line_hints) do
@@ -510,10 +513,12 @@ local defaults = {
 --- 'combine': combine with background text color. (default)
 --- 'replace': only show the virt_text color.
 --- @field hl_mode? 'combine'|'replace'
+--- Set the display priority when multiple extmark are present.
+--- @field priority? number
 --- line_hints: array with all hints present in current line.
 --- options: table with this plugin configuration.
 --- bufnr: buffer id from where the hints come from.
---- @field display_callback? fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number): ({text: string, col: number}[]|string|nil)
+--- @field display_callback? fun(line_hints: lsp.InlayHint[], options: InlayHintConfig, bufnr: number, winid: number): ({text: string, col: number}[]|string|nil)
 
 ---Setup/Update inlay-hint.nvim
 ---@param opts InlayHintPartialConfig?
