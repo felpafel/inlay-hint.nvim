@@ -525,7 +525,7 @@ function M.setup(opts)
   -- NOTE: Redraw inlay_hints, so the user can change the config multiple
   -- times in the same session
   for _, client in pairs(vim.lsp.get_clients({ method = 'textDocument/inlayHint' })) do
-    for _, bufnr in ipairs(vim.lsp.get_buffers_by_client_id(client.id)) do
+    for bufnr in pairs(vim.lsp.get_client_by_id(client.id).attached_buffers or {}) do
       if vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }) then
         vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
         vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
